@@ -1,25 +1,65 @@
-import logo from './logo.svg';
-import './App.css';
+import { useQuery, gql } from "@apollo/client";
 
-function App() {
+const FETCH_REPOS = gql`
+  query ($number_of_repos: Int!) {
+    viewer {
+      name
+      repositories(last: $number_of_repos) {
+        nodes {
+          name
+          forkCount
+          stargazers {
+            totalCount
+          }
+        }
+      }
+    }
+  }
+`;
+function DisplayLocations() {
+  const { loading, error, data } = useQuery(FETCH_REPOS, {
+    variables: { number_of_repos: 3 },
+  });
+  if (loading) return <p>Loading...</p>;
+
+  if (error) return <p>Error :(</p>;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <table>
+      <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Name</th>
+              <th>Stars</th>
+              <th>Forks</th>
+            </tr>
+            </thead>
+            <tbody>
+
+      {data.viewer.repositories.nodes.map(
+        ({ name, stargazers, forkCount }, index) => {
+          return (
+          <tr key={index}>
+            <td>{index}</td>
+            <td>{name}</td>
+            <td>🌟{stargazers.totalCount}</td>
+            <td>🍴{forkCount}</td>
+          </tr>
+          )
+        }
+      )}
+            </tbody>
+    </table>
   );
 }
+
+const App = () => {
+  return (
+    <div>
+      <h2>My first Apollo app 🚀</h2>
+      <DisplayLocations />
+    </div>
+  );
+};
 
 export default App;
